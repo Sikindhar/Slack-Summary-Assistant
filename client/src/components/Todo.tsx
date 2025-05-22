@@ -168,8 +168,8 @@ export function Todo() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <Card className="mb-8">
+    <div className="w-full max-w-4xl mx-auto">
+      <Card className="mb-6 sm:mb-8">
         <CardHeader>
           <CardTitle>Add New Todo</CardTitle>
         </CardHeader>
@@ -189,68 +189,75 @@ export function Todo() {
                 setNewTodo({ ...newTodo, description: e.target.value })}
               required
             />
-            <Button type="submit">Add Todo</Button>
+            <Button type="submit" className="w-full sm:w-auto">Add Todo</Button>
           </form>
         </CardContent>
       </Card>
 
-      <div className="flex justify-between mb-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
         <Button
           onClick={() => setShowAllTodos(!showAllTodos)}
           variant="outline"
+          className="w-full sm:w-auto"
         >
-          {showAllTodos ? "Hide All Todos" : "Show All Todos"}
+          {showAllTodos ? 'Show Incomplete' : 'Show All'}
         </Button>
         <Button
           onClick={handleSummarizeAllTodos}
-          disabled={isLoading || todos.filter(t => !t.completed).length === 0}
-          variant="secondary"
+          disabled={isLoading}
+          className="w-full sm:w-auto"
         >
-          {isLoading ? "Sending..." : "Summarize All Incomplete Todos"}
+          {isLoading ? 'Summarizing...' : 'Summarize All'}
         </Button>
       </div>
 
-      {showAllTodos && (
-        <div className="space-y-4">
-          {todos.map((todo) => (
-            <Card key={todo.id} className={todo.completed ? "opacity-60" : ""}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-4">
-                    <Checkbox
-                      checked={todo.completed}
-                      onCheckedChange={(checked) => 
-                        handleToggleTodo(todo.id, checked as boolean)}
-                    />
-                    <div>
-                      <h3 className="font-semibold">{todo.title}</h3>
-                      <p className="text-sm text-gray-500">{todo.description}</p>
-                      <p className="text-xs text-gray-400">
-                        Created by {todo.userName} on{' '}
-                        {format(new Date(todo.createdAt), 'PPp')}
-                      </p>
-                    </div>
+      <div className="space-y-4">
+        {todos
+          .filter(todo => showAllTodos || !todo.completed)
+          .map(todo => (
+            <Card key={todo.id} className="w-full">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <Checkbox
+                    checked={todo.completed}
+                    onCheckedChange={(checked) => 
+                      handleToggleTodo(todo.id, checked as boolean)}
+                    className="mt-1 sm:mt-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`text-lg font-semibold ${todo.completed ? 'line-through text-gray-500' : ''}`}>
+                      {todo.title}
+                    </h3>
+                    <p className={`text-sm text-gray-600 ${todo.completed ? 'line-through' : ''}`}>
+                      {todo.description}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Created: {format(new Date(todo.createdAt), 'PPp')}
+                    </p>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Button
+                      onClick={() => handleSummarizeTodo(todo)}
+                      disabled={summarizingTodoId === todo.id || todo.completed}
                       variant="outline"
                       size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      {summarizingTodoId === todo.id ? 'Summarizing...' : 'Summarize'}
+                    </Button>
+                    <Button
                       onClick={() => handleEditTodo(todo)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto"
                     >
                       Edit
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSummarizeTodo(todo)}
-                      disabled={todo.completed || summarizingTodoId === todo.id}
-                    >
-                      {summarizingTodoId === todo.id ? "Sending..." : "Summarize"}
-                    </Button>
-                    <Button
+                      onClick={() => handleDeleteTodo(todo.id)}
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleDeleteTodo(todo.id)}
+                      className="w-full sm:w-auto"
                     >
                       Delete
                     </Button>
@@ -259,18 +266,17 @@ export function Todo() {
               </CardContent>
             </Card>
           ))}
-        </div>
-      )}
+      </div>
 
-      <EditTodoDialog
-        isOpen={editingTodoId !== null}
-        onClose={handleCancelEdit}
-        onSave={handleUpdateTodo}
-        title={editingTodo.title}
-        description={editingTodo.description}
-        onTitleChange={(value) => setEditingTodo({ ...editingTodo, title: value })}
-        onDescriptionChange={(value) => setEditingTodo({ ...editingTodo, description: value })}
-      />
+      {editingTodoId && (
+        <EditTodoDialog
+          todo={editingTodo}
+          onUpdate={handleUpdateTodo}
+          onCancel={handleCancelEdit}
+          onChange={(field, value) => 
+            setEditingTodo(prev => ({ ...prev, [field]: value }))}
+        />
+      )}
     </div>
   );
 } 
