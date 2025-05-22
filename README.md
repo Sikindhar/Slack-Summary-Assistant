@@ -124,7 +124,7 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url_here
 
 ### Backend Architecture
 - **API Design**: RESTful API design with proper HTTP methods
-- **Authentication**: Firebase Admin SDK for secure token verification
+- **Authentication**: Firebase Admin SDK for secure token verification - used simple email auth
 - **Database**: Firebase Firestore for real-time data storage
 - **Error Handling**: Comprehensive error handling with proper status codes
 - **Middleware**: Custom middleware for authentication and request validation
